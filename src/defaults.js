@@ -12,12 +12,16 @@ export default {
   // Select value. Options: 'name' and 'code'
   valueType: 'name',
 
-  // Defines the initial value of province.
-  province: '—— 省 ——',
-
   // Defines the initial value of city.
   city: '—— 市 ——',
 
+  // country
+  country: '—— 县 ——',
+
   // Defines the initial value of district.
-  district: '—— 区 ——',
+  district: '—— 乡 ——',
+
+  // valilage
+
+  valilage: '—— 村 ——',
 };

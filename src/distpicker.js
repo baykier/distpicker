@@ -1,12 +1,17 @@
 import $ from 'jquery';
 import DEFAULTS from './defaults';
-import DISTRICTS from './districts';
+import  DISTRICTS from './dist';
 import { EVENT_CHANGE } from './constants';
 
-const DEFAULT_CODE = 100000;
-const PROVINCE = 'province';
+
+
+const DEFAULT_CODE = 410000000000;//河南省
+
+
 const CITY = 'city';
+const COUNTRY = 'country';
 const DISTRICT = 'district';
+const VALILAGE = 'valilage';
 
 export default class Distpicker {
   constructor(element, options) {
@@ -25,7 +30,7 @@ export default class Distpicker {
 
     $selects.each((i, select) => $.extend(data, $(select).data()));
 
-    $.each([PROVINCE, CITY, DISTRICT], (i, type) => {
+    $.each([ CITY, COUNTRY,DISTRICT,VALILAGE], (i, type) => {
       if (data[type]) {
         options[type] = data[type];
         this[`$${type}`] = $selects.filter(`[data-${type}]`);
@@ -42,32 +47,46 @@ export default class Distpicker {
   }
 
   bind() {
-    if (this.$province) {
-      this.$province.on(EVENT_CHANGE, (this.onChangeProvince = $.proxy(() => {
-        this.output(CITY);
+    if (this.$city) {
+      this.$city.on(EVENT_CHANGE, (this.onChangeCity = $.proxy(() => {
+        this.output(COUNTRY);
         this.output(DISTRICT, true);
+        this.output(VALILAGE, true);
       }, this)));
     }
 
-    if (this.$city) {
-      this.$city.on(
+    if (this.$country) {
+      this.$country.on(
         EVENT_CHANGE,
-        (this.onChangeCity = $.proxy(() => this.output(DISTRICT, true), this)),
+        (this.onChangeCountry = $.proxy(() => {
+          this.output(DISTRICT, true);
+          this.output(VALILAGE, true)
+        }, this)),
+      );
+    }
+    if (this.$district) {
+      this.$district.on(
+        EVENT_CHANGE,
+        (this.onChangeDistrict = $.proxy(() => this.output(VALILAGE, true), this)),
       );
     }
   }
 
   unbind() {
-    if (this.$province) {
-      this.$province.off(EVENT_CHANGE, this.onChangeProvince);
-    }
-
     if (this.$city) {
       this.$city.off(EVENT_CHANGE, this.onChangeCity);
+    }
+
+    if (this.$country) {
+      this.$country.off(EVENT_CHANGE, this.onChangeCountry);
+    }
+    if (this.$district) {
+      this.$country.off(EVENT_CHANGE, this.onChangeDistrict);
     }
   }
 
   output(type, triggerEvent = false) {
+    console.log(type);
     const { options, placeholders } = this;
     const $select = this[`$${type}`];
 
@@ -78,16 +97,20 @@ export default class Distpicker {
     let code;
 
     switch (type) {
-      case PROVINCE:
+      case CITY:
         code = DEFAULT_CODE;
         break;
 
-      case CITY:
-        code = this.$province && (this.$province.find(':selected').data('code') || '');
+      case COUNTRY:
+        code = this.$country && (this.$country.find(':selected').data('code') || '');
         break;
 
       case DISTRICT:
-        code = this.$city && (this.$city.find(':selected').data('code') || '');
+        code = this.$district && (this.$district.find(':selected').data('code') || '');
+        break;
+
+      case VALILAGE:
+        code = this.$valilage && (this.$valilage.find(':selected').data('code') || '');
         break;
     }
 
@@ -116,9 +139,11 @@ export default class Distpicker {
     if (!matched) {
       const autoselect = options.autoselect || options.autoSelect;
 
-      if (data.length && ((type === PROVINCE && autoselect > 0)
-        || (type === CITY && autoselect > 1)
-        || (type === DISTRICT && autoselect > 2))) {
+      if (data.length && ((type === CITY && autoselect > 0)
+        || (type === COUNTRY && autoselect > 1)
+        || (type === DISTRICT && autoselect > 2)
+        || (type === VALILAGE && autoselect > 3)
+        )) {
         data[0].selected = true;
       }
 
@@ -177,11 +202,13 @@ export default class Distpicker {
 
   reset(deep) {
     if (!deep) {
-      this.output(PROVINCE);
+
       this.output(CITY);
+      this.output(COUNTRY);
       this.output(DISTRICT);
-    } else if (this.$province) {
-      this.$province.find(':first').prop('selected', true).end().trigger(EVENT_CHANGE);
+      this.output(VALILAGE);
+    } else if (this.$city) {
+      this.$city.find(':first').prop('selected', true).end().trigger(EVENT_CHANGE);
     }
   }
 
